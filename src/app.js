@@ -9,6 +9,7 @@ import LocationData from './components/LocationData';
 
 const sensorTypes = ['Accelerometer', 'Gyroscope', 'Magnetometer']
 const locationTypes = ['GPS']
+const API_KEY = '6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6'
 const CHUNK_MAX = 100
 let GPS_max = false
 
@@ -19,7 +20,7 @@ class App extends Component {
         userId: null,
 		selectedActivity: '',
 	}
-    recordData = []
+    recordData = {}
     currentActivityRef = null
 
     constructor(props) {
@@ -79,9 +80,10 @@ class App extends Component {
         }
 
 		if (this.recordData[sensorType].length > CHUNK_MAX) {
-            //console.log('exceeded recordData', sensorType, sensorValue, this.recordData);
+            console.log('exceeded recordData', sensorType, sensorValue, this.recordData);
             //console.log(this.recordData[sensorType])
             this.pushToMongoDB(sensorType, {...this.recordData[sensorType]}, false)
+            console.log(...this.recordData[sensorType])
             /*this.currentActivityRef
                 .collection(sensorType)
                 .doc()
@@ -92,7 +94,8 @@ class App extends Component {
     }
 
     getCurrentDoc() {
-        fetch('https://api.mlab.com/api/1/databases/prototype/collections/sensorData?apiKey=6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6', {
+        /*
+        fetch('https://api.mlab.com/api/1/databases/prototype/collections/sensorData?apiKey='+API_KEY, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -100,15 +103,18 @@ class App extends Component {
             },
             body: JSON.stringify(data),
           })
+          */
     }
 
     pushToMongoDB(activityType, data, initPush) {
         var item = {}
         item [activityType] = data;
         //console.log(item)
+        console.log(data)
+        console.log(activityType)
 
         if (initPush) {
-            fetch('https://api.mlab.com/api/1/databases/prototype/collections/sensorData?apiKey=6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6', {
+            fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '?apiKey='+API_KEY, {
             method: 'POST',
             headers: {
                 Accept: 'application/json',
@@ -125,13 +131,15 @@ class App extends Component {
           .catch(((error) => console.log("ERROR happened --> ",error)))
         }
         else {
-            fetch('https://api.mlab.com/api/1/databases/prototype/collections/sensorData/'+this.currentActivityRef+'?apiKey=6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6', {
+            //fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + 'test' + '/' + '12345'+'?apiKey='+API_KEY, {
+            
+            fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json',
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({$push: item}),
+            body: JSON.stringify({$push: {data}}),
           })
           .then((response) => response.json())
             .then((responseJson) => {
@@ -146,13 +154,13 @@ class App extends Component {
 
     addNewActivity(){
 		const newActivity  = {
-		    userId: this.state.userId || 'DUMMY',
+		    //userId: this.state.userId || 'DUMMY',
 			definedActivity: this.state.selectedActivity || activityTypes[0].id,
             startTime: Date.now(),
             endTime: ''
 		}
         
-        this.pushToMongoDB(0,newActivity,true)
+        this.pushToMongoDB('Accelerometer',newActivity,true)
         /*this.currentActivityRef = this.sensorDataCollection.doc()
         this.currentActivityRef.set({...newActivity})*/
         
@@ -164,7 +172,7 @@ class App extends Component {
 
     setActivityEnd(){
         this.endTime = Date.now()
-        fetch('https://api.mlab.com/api/1/databases/prototype/collections/sensorData/'+this.currentActivityRef+'?apiKey=6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6', {
+        fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + 0 + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json',
