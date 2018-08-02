@@ -10,7 +10,7 @@ import LocationData from './components/LocationData';
 const sensorTypes = ['Accelerometer', 'Gyroscope', 'Magnetometer']
 const locationTypes = ['GPS']
 const API_KEY = '6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6'
-const CHUNK_MAX = 100
+const CHUNK_MAX = 50
 let GPS_max = false
 
 class App extends Component {
@@ -49,7 +49,7 @@ class App extends Component {
 
 
 	async sendDataToFirebase(sensorType, data) {
-		return new Promise((resolve) => {
+		/*return new Promise((resolve) => {
 
 			const currentActivityRef = this.db.ref('/sensorData').child(this.currentActivityKey);
 			console.log(currentActivityRef);
@@ -68,7 +68,7 @@ class App extends Component {
 				//
 				resolve();
 			})
-		})
+		})*/
 	}
 
     // value = {x: '', y: '', z: '', timestamp: '' }
@@ -80,14 +80,11 @@ class App extends Component {
         }
 
 		if (this.recordData[sensorType].length > (CHUNK_MAX-1)) {
-            console.log('exceeded recordData', sensorType, sensorValue, this.recordData);
+            //console.log('exceeded recordData', sensorType, sensorValue, this.recordData);
             //console.log(this.recordData[sensorType])
+            //console.log(...this.recordData[sensorType])
+
             this.pushToMongoDB(sensorType, {...this.recordData[sensorType]}, false)
-            console.log(...this.recordData[sensorType])
-            /*this.currentActivityRef
-                .collection(sensorType)
-                .doc()
-                .set({...this.recordData[sensorType]})*/
             this.recordData[sensorType] = []
 		}
         // this.checkForRecordChunks(sensorType, sensorValue)
@@ -107,12 +104,15 @@ class App extends Component {
     }
 
     pushToMongoDB(activityType, data, initPush) {
-        var item = {}
-        item [activityType] = data;
+        //var item = {}
+        //item [activityType] = data;
         //console.log(item)
-        console.log(data)
-        console.log(activityType)
+        //console.log(data)
+        //console.log(activityType)
 
+
+        // MISSING --> WHAT IF GPS DATA IS EMPTY
+        // ==> currently it is stil getting sent, no matter if it contains values or not
         if (initPush) {
             fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '?apiKey='+API_KEY, {
             method: 'POST',
@@ -131,8 +131,6 @@ class App extends Component {
           .catch(((error) => console.log("ERROR happened --> ",error)))
         }
         else {
-            //fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + 'test' + '/' + '12345'+'?apiKey='+API_KEY, {
-            
             fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
             method: 'PUT',
             headers: {
@@ -157,22 +155,21 @@ class App extends Component {
 		    //userId: this.state.userId || 'DUMMY',
 			definedActivity: this.state.selectedActivity || activityTypes[0].id,
             startTime: Date.now(),
-            endTime: ''
+            endTime: Date.now()
 		}
         
         this.pushToMongoDB('Accelerometer',newActivity,true)
-        /*this.currentActivityRef = this.sensorDataCollection.doc()
-        this.currentActivityRef.set({...newActivity})*/
-        
-        //console.log('added new activity to DB --> ',this.currentActivityRef.id)
-
-		//this.currentActivityKey = this.db.ref("sensorData").push(newActivity).key;
 		this.setState({ recording: true });
     }
 
-    setActivityEnd(){
+
+    // what if app crashes ==> no endTime set
+    // option1 => set endTime with every update (performance?)
+    // option2 => ???
+
+    setActivityEnd(activityType){
         this.endTime = Date.now()
-        fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + 0 + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
+        fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
             method: 'PUT',
             headers: {
                 Accept: 'application/json',
@@ -188,31 +185,6 @@ class App extends Component {
                 console.log(responseJson)
             })
           .catch(((error) => console.log("ERROR happened --> ",error)))
-    }
-
-    checkForRecordChunks(sensorType, value){
-        /*
-        var chunk = this.recordData.length;
-
-        var exitCond = chunk >= CHUNK_MAX
-        // var exitCond = (chunk1 || chunk2 || chunk3) >= 100
-
-        // if (chunk > 5) firebase.database().ref('activities/').push(this.activity)
-        if (exitCond)
-        {
-            firebase.database().ref('new/' + this.currentActivityKey + "/" + sensorType).set(this.recordData) // same as in "sendDataToFireBase" fct
-            //firebase.database().ref('new').child(this.currentActivityKey).child(sensorType).set(this.recordData)
-            this.recordData = []
-            //this.recordData[sensorType] = [value]
-
-            console.log(this.recordData)
-            console.log([value])
-            console.log("checked chunks --> uploaded current progress")
-            //var check = firebase.database().ref("new").child().orderByChild("definedActivity")
-            //console.log(check)
-        }
-        console.log(exitCond)
-        */
     }
 
     renderActivityList(list){
@@ -240,7 +212,6 @@ class App extends Component {
                                 />
                             ))
                         }
-
                         {
                             locationTypes.map(type => (
                                 <LocationData
@@ -251,7 +222,6 @@ class App extends Component {
                                 />
                             ))
                         }
-
                         <Picker
                             mode="dropdown"
                             enabled={!this.state.recording}
@@ -260,15 +230,13 @@ class App extends Component {
                         >
                             {this.renderActivityList(activityTypes)}
                         </Picker>
-
                         <CardSection>
                             <Button
                                 disabled={!this.state.recording}
                                 onPress={() => {
                                     this.setState({ recording: false })
-                                    // this.sendDataToFireBase()
                                     this.pushToMongoDB('GPS', {...this.recordData['GPS']}, false)
-                                    this.setActivityEnd()
+                                    this.setActivityEnd('Accelerometer')
                                     // send Activity end timestamp to mongoDB
                                 }}
                                 btnStyle="stop"
@@ -283,7 +251,6 @@ class App extends Component {
                                 Start
                             </Button>
                         </CardSection>
-
                         {/* <CardSection>
                             <Button onPress={() => firebase.auth().signOut()} >
                                 Log Out

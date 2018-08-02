@@ -67,7 +67,7 @@ class SensorData extends Component {
 			this.props.onUpdate(type, {
 				//type,
 				...recordData,
-				timestamp: (Date.now()/100).toFixed(1)*100
+				timestamp: ((new Date).getTime()/100).toFixed(1)*100
 			})
 			//console.log(recordData)
 		});
@@ -102,19 +102,16 @@ class SensorData extends Component {
 						placeholder="-"
 						readonly
 						label='X'
-						value={x.toString()}
 					/>
 					<Input
 						placeholder="-"
 						readonly
 						label='Y'
-						value={y.toString()}
 					/>
 					<Input
 						placeholder="-"
 						readonly
 						label='Z'
-						value={z.toString()}
 					/>
 				</CardSection>
 			</Card>
