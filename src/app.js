@@ -79,7 +79,7 @@ class App extends Component {
 			this.recordData[sensorType] = [sensorValue];
         }
 
-		if (this.recordData[sensorType].length > CHUNK_MAX) {
+		if (this.recordData[sensorType].length > (CHUNK_MAX-1)) {
             console.log('exceeded recordData', sensorType, sensorValue, this.recordData);
             //console.log(this.recordData[sensorType])
             this.pushToMongoDB(sensorType, {...this.recordData[sensorType]}, false)
