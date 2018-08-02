@@ -15,9 +15,9 @@ let GPS_max = false
 
 class App extends Component {
     state = {
-        loggedIn: false,
+        //loggedIn: false,
         recording: false,
-        userId: null,
+        //userId: null,
 		selectedActivity: '',
 	}
     recordData = {}
