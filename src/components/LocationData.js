@@ -3,7 +3,11 @@ import { Button, Card, CardSection, Input, TextLabel } from './common';
 import { DeviceEventEmitter } from 'react-native'
 
 class LocationData extends Component {
-	intervalId;
+	//intervalId;
+	watchId;
+	// if TRUE => GPS
+	// if FALSE => WIFI
+	useGps = true;
 
 	constructor(props) {
 		super(props);
@@ -22,7 +26,7 @@ class LocationData extends Component {
 	componentDidMount() {
 		if (this.props.recording) {
 			this.loadGPSData();
-			this.setInterval();
+			//this.setInterval();
 		}
 	}
 
@@ -32,11 +36,10 @@ class LocationData extends Component {
 		}, 10000);
 	}
 
-
 	// ISSUE --> first two entries still the same 
 	loadGPSData() {
 		console.log("loading GPS data...")
-		navigator.geolocation.getCurrentPosition(
+		this.watchId = navigator.geolocation.watchPosition(
 			(position) => {
 				var { accuracy, heading, latitude, longitude, speed } = position.coords;
 				const recordData = {
@@ -52,33 +55,38 @@ class LocationData extends Component {
 				this.props.onUpdate("GPS", recordData)
 				console.log(recordData)
 			},
-			(error) => this.setState({
-				accuracy: "",
-				// altidude: "",
-				heading: "",
-				latitude: "",
-				longitude: "",
-				speed: "",
-				timestamp: "",
-				error: error.message,
-
-			}),
+			(error) => {
+				this.setState({
+					accuracy: "",
+					// altidude: "",
+					heading: "",
+					latitude: "",
+					longitude: "",
+					speed: "",
+					timestamp: "",
+					error: error.message,
+				})
+				// use WiFi if GPS is not available after first time
+				this.useGps = false;
+			},
 			{
-				enableHighAccuracy: true,
+				enableHighAccuracy: this.useGps,
 				timeout: 10000,
 				maximumAge: 1000
 			}
 		);
 	}
 
+
 	componentDidUpdate(prevProps) {
 		const { recording } = this.props;
 
 		if (!recording && prevProps.recording) {
-			clearInterval(this.intervalId);
+			navigator.geolocation.clearWatch(this.watchId)
+			//clearInterval(this.intervalId);
 		} else if (recording && !prevProps.recording) {
 			this.loadGPSData();
-			this.setInterval();
+			//this.setInterval();
 		}
 	}
 
@@ -111,8 +119,10 @@ class LocationData extends Component {
 	}
 
 	componentWillUnmount() {
-		if (this.intervalId) {
-			clearInterval(this.intervalId)
+		//if (this.intervalId) {
+		if (this.watchId) {
+			//clearInterval(this.intervalId)
+			navigator.geolocation.clearWatch(this.watchId)
 		}
 	}
 }
