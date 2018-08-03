@@ -45,11 +45,12 @@ class LocationData extends Component {
 					'latitude': latitude,
 					'longitude': longitude,
 					'speed': speed,
-					'timestamp': (position.timestamp/100).toFixed(1)*100
+					'timestamp': position.timestamp
 				}
 
 				this.setState({ ...recordData, error: null });
 				this.props.onUpdate("GPS", recordData)
+				console.log(recordData)
 			},
 			(error) => this.setState({
 				accuracy: "",
