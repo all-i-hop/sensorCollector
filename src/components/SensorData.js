@@ -67,7 +67,7 @@ class SensorData extends Component {
 			this.props.onUpdate(type, {
 				//type,
 				...recordData,
-				timestamp: ((new Date).getTime()/100).toFixed(1)*100
+				timestamp: (new Date).getTime()
 			})
 			//console.log(recordData)
 		});
