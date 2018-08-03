@@ -159,10 +159,7 @@ class App extends Component {
 		}
         
         this.pushToMongoDB('Accelerometer',newActivity,true)
-        this.pushToMongoDB('Gyroscope',newActivity,true)
-        this.pushToMongoDB('Magnetometer',newActivity,true)
-        this.pushToMongoDB('GPS',newActivity,true)
-        
+
 		this.setState({ recording: true });
     }
 
