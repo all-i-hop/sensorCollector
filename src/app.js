@@ -10,7 +10,7 @@ import LocationData from './components/LocationData';
 const sensorTypes = ['Accelerometer', 'Gyroscope', 'Magnetometer']
 const locationTypes = ['GPS']
 const API_KEY = '6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6'
-const CHUNK_MAX = 50
+const CHUNK_MAX = 100
 let GPS_max = false
 
 class App extends Component {
@@ -162,7 +162,6 @@ class App extends Component {
         this.pushToMongoDB('Gyroscope',newActivity,true)
         this.pushToMongoDB('Magnetometer',newActivity,true)
         this.pushToMongoDB('GPS',newActivity,true)
-        
         
 		this.setState({ recording: true });
     }
