@@ -11,7 +11,8 @@ class SensorData extends Component {
 		this.state = {
 			x: '',
 			y: '',
-			z: ''
+			z: '',
+			timestamp: ''
 		};
 	}
 
@@ -60,14 +61,15 @@ class SensorData extends Component {
 				x: data['x'],
 				y: data['y'],
 				z: data['z'],
+				timestamp: data['timestamp'],
 			};
 
 			this.setState(recordData)
 
 			this.props.onUpdate(type, {
 				//type,
-				...recordData,
-				timestamp: (new Date).getTime()
+				...recordData
+				//timestamp: Date.now()
 			})
 			//console.log(recordData)
 		});
