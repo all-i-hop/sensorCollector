@@ -6,12 +6,15 @@ import { Header, Button, Spinner, CardSection } from './components/common';
 import SensorData from './components/SensorData';
 import activityTypes from './components/ActivityList.json'
 import LocationData from './components/LocationData';
+import DeviceInfo from 'react-native-device-info'
 
 const sensorTypes = ['Accelerometer', 'Gyroscope', 'Magnetometer']
 const locationTypes = ['GPS']
 const API_KEY = '6yz1_5_AcsFF5uXJWL5NXKEbds-zyis6'
-const CHUNK_MAX = 100
-let GPS_max = false
+const CHUNK_MAX = 200
+const serialNumber = DeviceInfo.getSerialNumber();
+const model = DeviceInfo.getModel();
+const systemVersion = DeviceInfo.getSystemVersion();
 
 class App extends Component {
     state = {
@@ -128,7 +131,7 @@ class App extends Component {
                 this.currentActivityRef = responseJson._id.$oid
                 console.log(this.currentActivityRef)
             })
-          .catch(((error) => console.log("ERROR happened --> ",error)))
+          .catch(((error) => console.log("ERROR happened --> ",activityType, error)))
         }
         else {
             fetch('https://api.mlab.com/api/1/databases/prototype/collections/' + activityType + '/' + this.currentActivityRef+'?apiKey='+API_KEY, {
@@ -144,22 +147,24 @@ class App extends Component {
                 //console.log(data.sensorType)
                 //console.log(activityType)
                 //console.log(data)
-                console.log("SUCCESS adding " + activityType + " data to activity " +this.currentActivityRef)
+                console.log("SUCCESS adding " + activityType + " data to activity " +this.currentActivityRef + " ====> " + Date.now())
+                console.log({data})
             })
-          .catch(((error) => console.log("ERROR happened --> ",error)))
+          .catch(((error) => console.log("ERROR happened --> ",activityType, error)))
         }
     }
 
     addNewActivity(){
 		const newActivity  = {
-		    //userId: this.state.userId || 'DUMMY',
+            serialNumber: serialNumber,
+            model: model,
+            systemVersion: systemVersion,
+            //userId: this.state.userId || 'DUMMY',
 			definedActivity: this.state.selectedActivity || activityTypes[0].id,
             startTime: Date.now(),
-            endTime: Date.now()
-		}
-        
-        this.pushToMongoDB('Accelerometer',newActivity,true)
-
+            endTime: ''
+		}   
+        this.pushToMongoDB('activities',newActivity,true)
 		this.setState({ recording: true });
     }
 
@@ -236,8 +241,11 @@ class App extends Component {
                                 disabled={!this.state.recording}
                                 onPress={() => {
                                     this.setState({ recording: false })
+                                    this.pushToMongoDB('Accelerometer', {...this.recordData["Accelerometer"]}, false)
+                                    this.pushToMongoDB('Gyroscope', {...this.recordData["Gyroscope"]}, false)
+                                    this.pushToMongoDB('Magnetometer', {...this.recordData["Magnetometer"]}, false)
                                     this.pushToMongoDB('GPS', {...this.recordData["GPS"]}, false)
-                                    this.setActivityEnd('Accelerometer')
+                                    this.setActivityEnd('activities')
                                     // send Activity end timestamp to mongoDB
                                 }}
                                 btnStyle="stop"
