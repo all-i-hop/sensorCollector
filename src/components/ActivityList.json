@@ -1,34 +1,34 @@
 [
     {
         "id": 0,
-        "title": "bike"
+        "title": "DUMMY"
     },
     {
         "id": 1,
-        "title": "bus"
+        "title": "Bike"
     },
     {
         "id": 2,
-        "title": "car"
+        "title": "Car"
     },
     {
         "id": 3,
-        "title": "jog"
+        "title": "Jogging"
     },
     {
         "id": 4,
-        "title": "metro"
+        "title": "Metro"
     },
     {
         "id": 5,
-        "title": "tram"
+        "title": "Tram"
     },
     {
         "id": 6,
-        "title": "train"
+        "title": "Train"
     },
     {
         "id": 7,
-        "title": "walk"
+        "title": "Walking"
     }
 ]
