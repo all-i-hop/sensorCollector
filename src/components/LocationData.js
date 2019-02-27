@@ -124,7 +124,8 @@ class LocationData extends Component {
 			{
 				enableHighAccuracy: true,
 				timeout: 5000,
-				maximumAge: 1000
+				maximumAge: 1000,
+				useSignificantChanges: true
 				//distanceFilter: 10
 			}
 		);
