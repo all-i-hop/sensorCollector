@@ -18,8 +18,6 @@ class SensorData extends Component {
 
 	componentDidMount() {
 		var { sensorType } = this.props;
-		// console.log(this.props)
-
 		if (this.props.recording) {
 			this.startSensor(sensorType, SENSOR_TIMER);
 			this.loadSensorData(sensorType);
@@ -67,11 +65,8 @@ class SensorData extends Component {
 			this.setState(recordData)
 
 			this.props.onUpdate(type, {
-				//type,
 				...recordData
-				//timestamp: Date.now()
 			})
-			//console.log(recordData)
 		});
 	}
 
